@@ -1,7 +1,7 @@
 export default {
   method: 'get',
   // 基础url前缀
-  baseURL: 'http://localhost:8081/',
+  baseURL: 'http://localhost:8082/',
 /*    baseURL: 'https://www.shuiot.com/slaughter1.0/',  */
   // 请求头信息
   headers: {

@@ -6,7 +6,7 @@
   </font>
   <el-form :model="loginForm" :rules="fieldRules" ref="loginForm" label-position="left" label-width="0px" class="demo-ruleForm login-container">
     <h2 class="title">系统登录</h2>
-    <el-form-item prop="account">
+    <el-form-item prop="username">
       <el-input type="text" v-model="loginForm.username" auto-complete="off" placeholder="账号"></el-input>
     </el-form-item>
     <el-form-item prop="password">
@@ -33,11 +33,11 @@
       return {
         logining: false,
         loginForm: {
-          username: 'admin',
-          password: '000000'
+          username: 'bishe',
+          password: 'bishe_527'
         },
         fieldRules: {
-          account: [
+          username: [
             { required: true, message: '请输入账号', trigger: 'blur' },
           ],
           password: [
@@ -56,9 +56,9 @@
           console.log(res)
       //    this.$axios.post('api/login1', JSON.stringify(userInfo)).then((res) => {
          //   Cookies.set('token', res.level) // 放置token到Cookie
-            console.log(res)
-            sessionStorage.setItem('user', res.user) // 保存用户到本地会话
-            this.$router.push('/monitor')  // 登录成功，跳转到主页
+
+            sessionStorage.setItem('user', res) // 保存用户到本地会话
+            this.$router.push('/')  // 登录成功，跳转到主页
           }).catch(function(res) {
             alert(res);
           });

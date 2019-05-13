@@ -14,7 +14,6 @@ export default function $axios(options) {
       withCredentials: config.withCredentials,
     /*   headers: config.headers,  */
       transformResponse: [function (data) {
-       // console.log(data)
          /*  data =  JSON.parse(data); */
 /*           if(typeof data.meta != 'undefined')
           {
@@ -108,7 +107,8 @@ export default function $axios(options) {
       err => {
         /* console.log(err.response.request.response) */
         let data = JSON.parse(err.response.request.response) 
-        if (err && err.response) {
+        console.log(data)
+/*         if (err && err.response) {
           switch (err.response.status) {
             case 400:
               err.message = '请求错误'
@@ -146,12 +146,11 @@ export default function $axios(options) {
             default:
               err.message = data.meta.message
           }
-        }
+        } */
        
-/*         console.log(err.response)
-        console.error(err) */
         console.error(err)
-        return Promise.reject(err) // 返回接口返回的错误信息
+        /* return Promise.reject(data.meta.message) */
+        return Promise.reject(data.meta.message) // 返回接口返回的错误信息
       } 
     )
 
