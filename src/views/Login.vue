@@ -2,7 +2,7 @@
 <div class="logPage" >
   <div style="margin-top:50px">
   <font class="bigTitle">
-    羊智能屠宰加工线远程监控与故障诊断平台
+    UGV监控平台
   </font>
   <el-form :model="loginForm" :rules="fieldRules" ref="loginForm" label-position="left" label-width="0px" class="demo-ruleForm login-container">
     <h2 class="title">系统登录</h2>
@@ -57,8 +57,8 @@
       //    this.$axios.post('api/login1', JSON.stringify(userInfo)).then((res) => {
          //   Cookies.set('token', res.level) // 放置token到Cookie
             console.log(res)
-            sessionStorage.setItem('user', res) // 保存用户到本地会话
-            this.$router.push('/')  // 登录成功，跳转到主页
+            sessionStorage.setItem('user', res.user) // 保存用户到本地会话
+            this.$router.push('/monitor')  // 登录成功，跳转到主页
           }).catch(function(res) {
             alert(res);
           });
@@ -76,6 +76,7 @@
 
 <style lang="scss" scoped>
   .logPage {
+    background-image: url('../assets/backGround.jpg');
     overflow: hidden;
     position: absolute;
     top: 0px;
