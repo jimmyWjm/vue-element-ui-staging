@@ -1,8 +1,8 @@
 export default {
   method: 'get',
   // 基础url前缀
-/*   baseURL: 'http://localhost:8081/', */
-   baseURL: 'https://www.shuiot.com/slaughter1.0/', 
+  baseURL: 'http://localhost:8081/',
+/*    baseURL: 'https://www.shuiot.com/slaughter1.0/',  */
   // 请求头信息
   headers: {
     'Content-Type': 'application/json;charset=UTF-8'
