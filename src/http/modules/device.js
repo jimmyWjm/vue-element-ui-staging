@@ -1,12 +1,30 @@
 import axios from '../axios'
 
-/* 
- * 菜单管理模块
- */
 
-export const findMenuTree = () => {
+export const Data = () => {
     return axios({
-        url: '/menu/findTree',
+        url: '/device/data',
+        method: 'get'
+    })
+}
+
+export const Power = () => {
+    return axios({
+        url: '/device/power',
+        method: 'get'
+    })
+}
+
+export const mainControl = () => {
+    return axios({
+        url: '/device/mainControl',
+        method: 'get'
+    })
+}
+
+export const markers = () => {
+    return axios({
+        url: '/device/marker',
         method: 'get'
     })
 }

@@ -9,8 +9,10 @@ import i18n from './i18n'
 import store from './store'
 import 'font-awesome/css/font-awesome.min.css'
 
+
 Vue.use(ElementUI)
 Vue.use(api)
+
 
 new Vue({
   el: '#app',
