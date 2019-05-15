@@ -1,21 +1,78 @@
 <template>
   <div class="test">
-    <div id="container" style="width:600px;height:600px"></div>
+    <el-row>
+        <el-col :span="13">
+        <div id="container" style="width:100%;height:600px"></div>
+        </el-col>
+        <el-col :span="3">
+          <div style="margin-top:10px">
+              <div class="text-left" style="font-size:20px;font-family:'中易宋体';font-weight: bold;">data.number</div>
+          </div>
+          <div class="textBorder">
+              <input type="text" name="input1" :value="data.number" readonly="true" class="textInput" id="areaDaily">
+          </div>
+          <div style="margin-top:5px">
+              <div class="text-left" style="font-size:20px;font-family:'中易宋体';font-weight: bold;">data.motorId</div>
+          </div>
+          <div class="textBorder">
+              <input type="text" name="input1" :value="data.motorId" readonly="true" class="textInput" id="areaDaily">
+          </div>
+          <div style="margin-top:5px">
+              <div class="text-left" style="font-size:20px;font-family:'中易宋体';font-weight: bold;">data.err</div>
+          </div>
+          <div class="textBorder">
+              <input type="text" name="input1" :value="data.err" readonly="true" class="textInput" id="areaDaily">
+          </div>
+        </el-col>
+    </el-row>
     <div>{{data}}</div>
     <div>{{power}}</div>
     <div>{{mainControl}}</div>
-    <div>按照data.number的形式取具体属性: {{data.number}}</div>
   </div>
 </template>
+<style>
+        div.text-left
+     {
+        font-size:17px;
+        font-family:"黑体";
+        font-weight: bold;
+        height: 40px;
+        line-height: 40px;
+        display:inline-block
+     }
+     .textInput
+     {
+        border:1px solid;
+        width:70px;
+        height:40px;
+        font-size: 17px;
+        text-align:center;
+        background-color:#63B8FF;
+        color:white;
+        display:inline-block
+     }
+</style>
+
 <script>
 import MapLoader from '@/AMap/AMap.js'
 import { setInterval } from 'timers';
-
+import { connect } from 'net';
+import MapUILoader from '@/AMap/AMapUI.js'
 export default {
       name: 'amap-page',
       data() {
         return {
-          data:'',
+          data:{
+            number:'',
+            motorId:'',
+            err:'',
+            rpm:'',
+            cur:'',
+            deg:'',
+            height:'',
+            temp:'',
+            time:''
+          },
           power:'',
           mainControl:'',
           count: 1,
@@ -57,6 +114,11 @@ export default {
             var controlBar = new AMap.ControlBar(Options)
             that.map.addControl(controlBar)
         });
+      }, e => {
+        console.log('地图加载失败', e)
+      })
+       MapUILoader().then(AMapUI => {
+          console.log("加载UI成功")
         for(let i=0;i<that.markersDetail.length;i++){
             let marker = new AMap.Marker({
               position: [that.markersDetail[i].lnt,that.markersDetail[i].lat],
@@ -71,8 +133,8 @@ export default {
             that.infoWindow = infoWindow
             AMap.event.addListener(marker, 'click', that.markerClick); 
         }
-      }, e => {
-        console.log('地图加载失败', e)
+        }, e => {
+        console.log('UI加载失败', e)
       })
     },
         getData(){
