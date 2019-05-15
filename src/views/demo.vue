@@ -113,15 +113,13 @@ export default {
         })
       },
       markerReq(){
-        let that = this
-        console.log("我执行了")
-        
+        let that = this 
        MapUILoader().then(AMapUI => {
           console.log("加载UI成功")
           AMapUI.loadUI(['overlay/SimpleMarker'], function(SimpleMarker) {
               var iconTheme = 'default';	 
               var iconStyles = SimpleMarker.getBuiltInIconStyles(iconTheme);
-              var now = new Date().getTime
+              var now = new Date().getTime()
               for(let i=0;i<that.markersDetail.length;i++){
 
                   let date = that.markersDetail[i].time;
@@ -189,21 +187,49 @@ export default {
         },
         //地图更新
         updateMap(){
+            let that = this
             this.$api.device.markers().then((res) =>{
                 this.markersDetail = res.data;
-                if(this.infoWindow.getIsOpen()){
-                     for(var i=0; i<this.markersDetail.length;i++){
-                       this.markers[i].setPosition([this.markersDetail[i].lnt, this.markersDetail[i].lat])
-                       if(this.infoWindow.getContent() == this.markers[i].content) 
-                      {
-                       this.infoWindow.setPosition([this.markersDetail[i].lnt, this.markersDetail[i].lat])
+                var now = new Date().getTime()
+            AMapUI.loadUI(['overlay/SimpleMarker'], function(SimpleMarker) {
+              var iconTheme = 'default';	 
+              var iconStyles = SimpleMarker.getBuiltInIconStyles(iconTheme);
+              if(that.infoWindow.getIsOpen()){
+                  for(var i=0; i<that.markersDetail.length;i++){
+                      //marker位置
+                      that.markers[i].setPosition([that.markersDetail[i].lnt, that.markersDetail[i].lat])
+                      //样式变化
+                      let date = that.markersDetail[i].time;
+                      date = date.substring(0,19);    
+                      date = date.replace(/-/g,'/'); 
+                      var markerTime = new Date(date).getTime();
+                      if(now - markerTime <=180000){
+                        that.markers[i].setIconStyle(iconStyles[2])
+                      }else{
+                        that.markers[i].setIconStyle(iconStyles[10])
                       }
-                    }
-                }else{
-                    for(var i=0; i<this.markersDetail.length;i++){
-                       this.markers[i].setPosition([this.markersDetail[i].lnt, this.markersDetail[i].lat])
-                    }
-                }
+                      //窗体位置
+                      if(that.infoWindow.getContent() == that.markers[i].content) {
+                        that.infoWindow.setPosition([that.markersDetail[i].lnt, that.markersDetail[i].lat])
+                      }
+                  }
+              }else{
+                  for(var i=0; i<that.markersDetail.length;i++){
+                      //marker位置
+                      that.markers[i].setPosition([that.markersDetail[i].lnt, that.markersDetail[i].lat])
+                      //样式变化
+                      let date = that.markersDetail[i].time;
+                      date = date.substring(0,19);    
+                      date = date.replace(/-/g,'/'); 
+                      var markerTime = new Date(date).getTime();
+                      if(now - markerTime <=180000){
+                        that.markers[i].setIconStyle(iconStyles[2])
+                      }else{
+                        that.markers[i].setIconStyle(iconStyles[10])
+                      }
+                  }
+              }
+            })
             })
         },
         markerClick(e) {
@@ -221,8 +247,8 @@ export default {
       //更新信息
 /*       setInterval(this.getData,1000)
       setInterval(this.getPower,1000)
-      setInterval(this.getMainControl,1000)
-      setInterval(this.updateMap,1000) */
+      setInterval(this.getMainControl,1000) */
+      setInterval(this.updateMap,1000) 
   }
 }
 </script>
