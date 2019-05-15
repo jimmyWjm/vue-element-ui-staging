@@ -5,16 +5,23 @@ export default function MapUILoader () {
       if (window.AMapUI) {
         resolve(window.AMapUI)
       } else {
+        var initAMapUI = () => {
+          resolve(window.AMapUI)
+        }
         var script = document.createElement('script')
         script.type = 'text/javascript'
         script.async = true
-        script.src =
-          'http://webapi.amap.com/ui/1.0/main.js'
+        script.src = 'http://webapi.amap.com/ui/1.0/main.js'
         script.onerror = reject
         document.head.appendChild(script)
+        document.addEventListener ? script.addEventListener("load", initAMapUI, false) : script.onreadystatechange = function() {
+          console.log(script.readyState);
+          if (/loaded|complete/.test(script.readyState)) {
+            script.onreadystatechange = null
+            initAMapUI();
+          }
+        }
       }
-      window.initAMapUI = () => {
-        resolve(window.AMapUI)
-      }
+      
     })
   }
