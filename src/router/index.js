@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Login from '@/views/Login'
-
+import Demo from '@/views/demo'
 Vue.use(Router)
 
 const router = new Router({
@@ -10,6 +10,10 @@ const router = new Router({
       path: '/login',
       name: '登录',
       component: Login
+    },
+    {
+      path: '/',
+      component: Demo
     }
   ]
 })
