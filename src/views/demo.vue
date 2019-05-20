@@ -3,6 +3,10 @@
     <el-row>
         <el-col :span="13">
         <div id="container" style="width:100%;height:600px"></div>
+        <div class="button-group">
+          <input type="button" class="button" :value="online" v-on:click="hide" style="font-family:华文楷体 !important;font-size:20px" />
+          <input type="button" class="button" :value="isCluster"  v-on:click="addCluster" style="font-family:华文楷体 !important;font-size:20px" />
+        </div>   
         </el-col>
         <el-col :span="3">
           <div style="margin-top:10px">
@@ -31,7 +35,7 @@
   </div>
 </template>
 <style>
-        div.text-left
+        div.text-left 
      {
         font-size:17px;
         font-family:"黑体";
@@ -51,13 +55,34 @@
         color:white;
         display:inline-block
      }
+      .button-group 
+     {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      padding: 10px;
+     }
+    .button-group .button 
+     {
+      height: 28px;
+      line-height: 28px;
+      background-color: #0D9BF2;
+      color: #FFF;
+      border: 0;
+      outline: none;
+      padding-left: 5px;
+      padding-right: 5px;
+      border-radius: 3px;
+      margin-bottom: 4px;
+      cursor: pointer;
+     }
 </style>
 
 <script>
-import MapLoader from '@/AMap/AMap.js'
+import AMap from 'AMap';
 import { setInterval } from 'timers';
 import { connect } from 'net';
-import MapUILoader from '@/AMap/AMapUI.js'
+import AMapUI from 'AMapUI';
 export default {
       name: 'amap-page',
       data() {
@@ -81,7 +106,11 @@ export default {
           markers: [],
           infoWindow: null,
           window: '',
-          map: null
+          map: null,
+          online:'隐藏离线设备',
+          isCluster:'点聚合',
+          cluster:null,
+          markersOnline:[]
         };
       },
   methods: {
@@ -89,8 +118,6 @@ export default {
     // 获取高德地图api
       mapReq () {
         let that = this
-        MapLoader().then(AMap => {
-          console.log('地图加载成功')
           this.markerReq();
           that.map = new AMap.Map('container', {
             resizeEnable: true,
@@ -108,14 +135,9 @@ export default {
               var controlBar = new AMap.ControlBar(Options)
               that.map.addControl(controlBar)
           });
-        }, e => {
-          console.log('地图加载失败', e)
-        })
       },
       markerReq(){
         let that = this 
-       MapUILoader().then(AMapUI => {
-          console.log("加载UI成功")
           AMapUI.loadUI(['overlay/SimpleMarker'], function(SimpleMarker) {
               var iconTheme = 'default';	 
               var iconStyles = SimpleMarker.getBuiltInIconStyles(iconTheme);
@@ -155,9 +177,6 @@ export default {
                   infoWindow.setContent(marker.content);
                   that.infoWindow = infoWindow
           })
-        }, e => {
-        console.log('UI加载失败', e)
-      })
       },
         getData(){
         this.$api.device.Data().then((res) => {
@@ -189,45 +208,104 @@ export default {
         updateMap(){
             let that = this
             this.$api.device.markers().then((res) =>{
-                this.markersDetail = res.data;
-                var now = new Date().getTime()
+            this.markersDetail = res.data;
+            var now = new Date().getTime()
+            this.markersOnline= []
             AMapUI.loadUI(['overlay/SimpleMarker'], function(SimpleMarker) {
               var iconTheme = 'default';	 
               var iconStyles = SimpleMarker.getBuiltInIconStyles(iconTheme);
-              if(that.infoWindow.getIsOpen()){
-                  for(var i=0; i<that.markersDetail.length;i++){
-                      //marker位置
-                      that.markers[i].setPosition([that.markersDetail[i].lnt, that.markersDetail[i].lat])
-                      //样式变化
-                      let date = that.markersDetail[i].time;
-                      date = date.substring(0,19);    
-                      date = date.replace(/-/g,'/'); 
-                      var markerTime = new Date(date).getTime();
-                      if(now - markerTime <=180000){
-                        that.markers[i].setIconStyle(iconStyles[2])
-                      }else{
-                        that.markers[i].setIconStyle(iconStyles[10])
-                      }
-                      //窗体位置
-                      if(that.infoWindow.getContent() == that.markers[i].content) {
-                        that.infoWindow.setPosition([that.markersDetail[i].lnt, that.markersDetail[i].lat])
-                      }
-                  }
+              if(that.online=="隐藏离线设备"){
+                    //目前是显示离线设备
+                    if(that.infoWindow.getIsOpen()){
+                        for(var i=0; i<that.markersDetail.length;i++){
+                            //marker位置
+                            that.markers[i].setPosition([that.markersDetail[i].lnt, that.markersDetail[i].lat])
+                            //样式变化
+                            let date = that.markersDetail[i].time;
+                            date = date.substring(0,19);    
+                            date = date.replace(/-/g,'/'); 
+                            var markerTime = new Date(date).getTime();
+                            if(now - markerTime <=180000){
+                              that.markers[i].setIconStyle(iconStyles[2])
+                              that.markersOnline.push(that.markers[i])
+                            }else{
+                              that.markers[i].setIconStyle(iconStyles[10])
+                            }
+                            //窗体位置
+                            if(that.infoWindow.getContent() == that.markers[i].content) {
+                              that.infoWindow.setPosition([that.markersDetail[i].lnt, that.markersDetail[i].lat])
+                            }
+                            that.markers[i].show();
+                        }
+                    }
+                    else{
+                        for(var i=0; i<that.markersDetail.length;i++){
+                            //marker位置
+                            that.markers[i].setPosition([that.markersDetail[i].lnt, that.markersDetail[i].lat])
+                            //样式变化
+                            let date = that.markersDetail[i].time;
+                            date = date.substring(0,19);    
+                            date = date.replace(/-/g,'/'); 
+                            var markerTime = new Date(date).getTime();
+                            if(now - markerTime <=180000){
+                              that.markers[i].setIconStyle(iconStyles[2])
+                              that.markersOnline.push(that.markers[i])
+                            }else{
+                              that.markers[i].setIconStyle(iconStyles[10])
+                            }
+                            that.markers[i].show();
+                        }
+                    }
               }else{
-                  for(var i=0; i<that.markersDetail.length;i++){
-                      //marker位置
-                      that.markers[i].setPosition([that.markersDetail[i].lnt, that.markersDetail[i].lat])
-                      //样式变化
-                      let date = that.markersDetail[i].time;
-                      date = date.substring(0,19);    
-                      date = date.replace(/-/g,'/'); 
-                      var markerTime = new Date(date).getTime();
-                      if(now - markerTime <=180000){
-                        that.markers[i].setIconStyle(iconStyles[2])
-                      }else{
-                        that.markers[i].setIconStyle(iconStyles[10])
-                      }
-                  }
+                    //目前是隐藏离线设备
+                    if(that.infoWindow.getIsOpen()){
+                        for(var i=0; i<that.markersDetail.length;i++){
+                            //marker位置
+                            that.markers[i].setPosition([that.markersDetail[i].lnt, that.markersDetail[i].lat])
+                            //样式变化
+                            let date = that.markersDetail[i].time;
+                            date = date.substring(0,19);    
+                            date = date.replace(/-/g,'/'); 
+                            var markerTime = new Date(date).getTime();
+                            if(now - markerTime <=180000){
+                              that.markers[i].setIconStyle(iconStyles[2])
+                              //在线设备要全部显示
+                              //窗体位置
+                              if(that.infoWindow.getContent() == that.markers[i].content) {
+                                that.infoWindow.setPosition([that.markersDetail[i].lnt, that.markersDetail[i].lat])
+                              }
+                              that.markers[i].show();
+                              that.markersOnline.push(that.markers[i])
+                            }else{
+                              that.markers[i].setIconStyle(iconStyles[10])
+                              //离线设备要隐藏
+                              that.markers[i].hide();
+                              //窗体位置
+                              if(that.infoWindow.getContent() == that.markers[i].content) {
+                                that.infoWindow.close();
+                              }
+                            }
+                        }
+                    }else{
+                        for(var i=0; i<that.markersDetail.length;i++){
+                            //marker位置
+                            that.markers[i].setPosition([that.markersDetail[i].lnt, that.markersDetail[i].lat])
+                            //样式变化
+                            let date = that.markersDetail[i].time;
+                            date = date.substring(0,19);    
+                            date = date.replace(/-/g,'/'); 
+                            var markerTime = new Date(date).getTime();
+                            if(now - markerTime <=180000){
+                              that.markers[i].setIconStyle(iconStyles[2])
+                              that.markers[i].show();
+                              that.markersOnline.push(that.markers[i])
+                            }else{
+                              that.markers[i].setIconStyle(iconStyles[10])
+                              that.markers[i].hide();
+                            }
+                        }
+                    }
+
               }
             })
             })
@@ -235,6 +313,72 @@ export default {
         markerClick(e) {
         this.infoWindow.setContent(e.target.content);
         this.infoWindow.open(this.map, e.target.getPosition());
+        },
+        //是否隐藏离线设备
+        hide(){
+         if(this.online == "隐藏离线设备"){
+           this.online = "显示离线设备"
+         }else{
+           this.online = "隐藏离线设备"
+         }
+         //切换的时候主动更新
+         this.updateCluster()
+        },
+        //改变的是标志
+        addCluster(){
+          let that = this
+          that.map.plugin(["AMap.MarkerClusterer"],function(){
+          //原来是无聚合，转为点聚合
+          if(that.isCluster == "点聚合"){
+            that.isCluster = "无聚合"
+            if(that.cluster) {     
+                that.cluster.setMap(null);  
+            }
+            //说明目前为显示离线设备   
+            if(that.online == "隐藏离线设备"){
+              that.cluster = new AMap.MarkerClusterer(that.map,that.markers); 
+            }else{
+            //隐藏离线设备
+              that.cluster = new AMap.MarkerClusterer(that.map,that.markersOnline); 
+            }
+          }else{
+          //原来是点聚合，转为无聚合
+            that.isCluster = "点聚合"
+            if(that.cluster) {     
+                that.cluster.setMap(null);  
+            }
+            for(let i=0;i<that.markers.length;i++){
+              that.markers[i].setMap(that.map)
+            }
+          }
+          })
+        },
+        //定期更新状态
+        updateCluster(){
+          let that = this
+          that.map.plugin(["AMap.MarkerClusterer"],function(){
+          //点聚合
+          if(that.isCluster == "无聚合"){
+            if(that.cluster) {     
+              that.cluster.setMap(null);  
+            }
+            //说明目前为显示离线设备   
+            if(that.online == "隐藏离线设备"){
+              that.cluster = new AMap.MarkerClusterer(that.map,that.markers); 
+            }else{
+            //隐藏离线设备
+              that.cluster = new AMap.MarkerClusterer(that.map,that.markersOnline); 
+            }
+          }else{
+          //无聚合
+            if(that.cluster) {     
+                that.cluster.setMap(null);  
+            }
+            for(let i=0;i<that.markers.length;i++){
+              that.markers[i].setMap(that.map)
+            }
+          }
+          })
         }
  
   },
@@ -245,10 +389,12 @@ export default {
       this.getMainControl();
       this.getMarkersDetail(); 
       //更新信息
-/*       setInterval(this.getData,1000)
+      setInterval(this.getData,1000)
       setInterval(this.getPower,1000)
-      setInterval(this.getMainControl,1000) */
-      setInterval(this.updateMap,1000) 
+      setInterval(this.getMainControl,1000) 
+      setInterval(this.updateMap,500) 
+      //点聚合更新
+      setInterval(this.updateCluster,60*1000)
   }
 }
 </script>
