@@ -10,28 +10,31 @@
         </el-col>
         <el-col :span="3">
           <div style="margin-top:10px">
-              <div class="text-left" style="font-size:20px;font-family:'中易宋体';font-weight: bold;">data.number</div>
+              <div class="text-left" style="font-size:20px;font-family:'中易宋体';font-weight: bold;">power.v1</div>
           </div>
           <div class="textBorder">
-              <input type="text" name="input1" :value="data.number" readonly="true" class="textInput" id="areaDaily">
+              <input type="text" name="input1" :value="power.v1" readonly="true" class="textInput" id="areaDaily">
           </div>
           <div style="margin-top:5px">
-              <div class="text-left" style="font-size:20px;font-family:'中易宋体';font-weight: bold;">data.motorId</div>
+              <div class="text-left" style="font-size:20px;font-family:'中易宋体';font-weight: bold;">power.v2</div>
           </div>
           <div class="textBorder">
-              <input type="text" name="input1" :value="data.motorId" readonly="true" class="textInput" id="areaDaily">
+              <input type="text" name="input1" :value="power.v2" readonly="true" class="textInput" id="areaDaily">
           </div>
           <div style="margin-top:5px">
-              <div class="text-left" style="font-size:20px;font-family:'中易宋体';font-weight: bold;">data.err</div>
+              <div class="text-left" style="font-size:20px;font-family:'中易宋体';font-weight: bold;">power.i1</div>
           </div>
           <div class="textBorder">
-              <input type="text" name="input1" :value="data.err" readonly="true" class="textInput" id="areaDaily">
+              <input type="text" name="input1" :value="power.i1" readonly="true" class="textInput" id="areaDaily">
           </div>
         </el-col>
     </el-row>
-    <div>{{data}}</div>
     <div>{{power}}</div>
     <div>{{mainControl}}</div>
+    <div>{{leftFront}}</div>
+    <div>{{rightFront}}</div>
+    <div>{{leftBehind}}</div>
+    <div>{{rightBehind}}</div>
   </div>
 </template>
 <style>
@@ -87,17 +90,30 @@ export default {
       name: 'amap-page',
       data() {
         return {
-          data:{
-            number:'',
-            motorId:'',
-            err:'',
-            rpm:'',
-            cur:'',
-            deg:'',
-            height:'',
-            temp:'',
-            time:''
+          leftBehind:{
+            time:'',
+            lbderr:'',
+            lbdrpm:'',
+            lbdcurr:'',
+            lbddeg:'',
+            lbdheight:'',
+            lbdtemp:'',
+            lbzerr:'',
+            lbzrpmL:'',
+            lbzcurr:'',
+            lbzdeg:'',
+            lbzheight:'',
+            lbztemp:'',
+            lbterr:'',
+            lbtrpm:'',
+            lbtcurr:'',
+            lbtdeg:'',
+            lbtheight:'',
+            lbttemp:'',
           },
+          rightBehind:'',
+          leftFront:'',
+          rightFront:'',
           power:'',
           mainControl:'',
           zoom: 8,
@@ -178,9 +194,30 @@ export default {
                   that.infoWindow = infoWindow
           })
       },
-        getData(){
-        this.$api.device.Data().then((res) => {
-            this.data = res.data;
+        getLeftBehind(){
+        this.$api.device.LeftBehind().then((res) => {
+            this.leftBehind = res.data;
+            }).catch(function(res) {
+            alert(res);
+            });
+        },
+        getLeftFront(){
+        this.$api.device.LeftFront().then((res) => {
+            this.leftFront = res.data;
+            }).catch(function(res) {
+            alert(res);
+            });
+        },
+        getRightFront(){
+        this.$api.device.RightFront().then((res) => {
+            this.rightFront = res.data;
+            }).catch(function(res) {
+            alert(res);
+            });
+        },
+        getRightBehind(){
+        this.$api.device.RightBehind().then((res) => {
+            this.rightBehind = res.data
             }).catch(function(res) {
             alert(res);
             });
@@ -379,19 +416,23 @@ export default {
             }
           }
           })
+        },
+        updateData(){
+          this.getLeftFront();
+          this.getLeftBehind();
+          this.getRightFront();
+          this.getRightBehind();
+          this.getPower();
+          this.getMainControl();
         }
  
   },
   mounted(){
       //初始化页面
-      this.getData();
-      this.getPower();
-      this.getMainControl();
+      this.updateData();
       this.getMarkersDetail(); 
       //更新信息
-      setInterval(this.getData,1000)
-      setInterval(this.getPower,1000)
-      setInterval(this.getMainControl,1000) 
+      setInterval(this.updateData,1000)
       setInterval(this.updateMap,500) 
       //点聚合更新
       setInterval(this.updateCluster,60*1000)
